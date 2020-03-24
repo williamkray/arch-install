@@ -42,7 +42,7 @@ boot_mountpoint="${root_mountpoint}/boot"
 
 ## mount partitions appropriately
 echo "mounting filesystems for installation at $root_mountpoint"
-mkdir -p $root_mountpoint
+mkdir -p $root_mountpoint $boot_mountpoint
 mount /dev/mapper/cryptroot $root_mountpoint
 mount ${INSTALL_DISK}1 $boot_mountpoint
 
