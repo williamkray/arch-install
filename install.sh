@@ -48,7 +48,7 @@ INSTALL_PKGS="base \
   i3lock \
   feh \
   virtualbox \
-  virtualbox-host-modules \
+  virtualbox-host-modules-arch \
   wget \
   curl \
   git"
