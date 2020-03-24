@@ -104,7 +104,30 @@ echo "generating initramfs"
 _chroot mkinitcpio -P
 echo "setting root password"
 _chroot passwd
-echo "installing efistub bootloader config"
-_chroot efibootmgr --disk ${INSTALL_DISK} --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode "cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw initrd=/intel-ucode.img initrd=/initramfs-linux.img"
+echo "installing systemd-boot"
+_chroot bootctl --path=/boot install
+cat << EOF > ${boot_mountpoint}/loader/loader.conf
+timeout 3
+default arch
+auto-entries 1
+editor 0
+EOF
+
+echo "writing systemd-boot entries"
+cat << EOF > ${boot_mountpoint}/loader/entries/arch.conf
+title Arch Linux (Standard Kernel)
+linux /vmlinuz-linux
+initrd /intel-ucode.img
+initrd /initramfs-linux.img
+options cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw
+EOF
+
+cat << EOF > ${boot_mountpoint}/loader/entries/arch-lts.conf
+title Arch Linux (LTS Kernel)
+linux /vmlinuz-linux-lts
+initrd /intel-ucode.img
+initrd /initramfs-linux-lts.img
+options cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw
+EOF
 
 echo "done"
