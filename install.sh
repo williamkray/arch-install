@@ -6,8 +6,65 @@ set -euo pipefail
 ## intended to be run from the arch live ISO
 ## this script is extremely destructive, run with caution
 
-echo "sourcing variables"
-source variables.sh
+## sets environment variables to be used by an arch installation
+INSTALL_DISK="/dev/sda"
+INSTALL_PKGS="base \
+  base-devel \
+  linux \
+  linux-firmware \
+  linux-lts \
+  linux-headers \
+  linux-lts-headers \
+  docker \
+  docker-compose \
+  openssh \
+  xorg-server \
+  xorg-server-devel \
+  xorg-xsetroot \
+  ttf-dejavu \
+  rsync \
+  pcmanfm \
+  gimp \
+  firefox \
+  tmux \
+  vim \
+  rofi \
+  arandr \
+  wireless_tools \
+  wpa_supplicant \
+  dhcpcd \
+  netctl \
+  intel-ucode \
+  cmus \
+  efibootmgr \
+  alsa-utils \
+  pulseaudio-alsa \
+  pavucontrol \
+  pulseaudio \
+  pulseaudio-bluetooth \
+  ifplugd \
+  xorg-xinit \
+  xautolock \
+  i3lock \
+  feh \
+  virtualbox \
+  virtualbox-host-modules \
+  wget \
+  curl \
+  git"
+TIMEZONE="America/Los_Angeles"
+HOSTNAME="testhost"
+USERNAME="wreck"
+
+
+## define things
+## set other variables
+root_mountpoint="/mnt"
+boot_mountpoint="${root_mountpoint}/boot"
+## change-root and install various system configurations
+_chroot() {
+  arch-chroot ${root_mountpoint} $*
+}
 
 echo "setting time"
 timedatectl set-ntp true
@@ -23,6 +80,7 @@ parted --script -a opt -- ${INSTALL_DISK} \
   set 1 esp on \
   mkpart root ext4 512MiB 100%
 
+cryptuuid=$(blkid -s UUID -o value ${INSTALL_DISK}2)
 ## create our encrypted root volume
 ## and decrypt it
 echo "creating encrypted root volume"
@@ -35,10 +93,6 @@ cryptsetup open ${INSTALL_DISK}2 cryptroot
 echo "formatting filesystems"
 mkfs.fat -F32 ${INSTALL_DISK}1
 mkfs.ext4 /dev/mapper/cryptroot
-
-## set other variables
-root_mountpoint="/mnt"
-boot_mountpoint="${root_mountpoint}/boot"
 
 ## mount partitions appropriately
 echo "mounting filesystems for installation at $root_mountpoint"
@@ -68,10 +122,6 @@ pacstrap $root_mountpoint $INSTALL_PKGS
 echo "generating fstab"
 genfstab -U ${root_mountpoint} >> ${root_mountpoint}/etc/fstab
 
-## change-root and install various system configurations
-_chroot() {
-  arch-chroot ${root_mountpoint} $*
-}
 
 pushd ${root_mountpoint}
 echo "setting timezone to $TIMEZONE"
@@ -95,7 +145,6 @@ echo 'FILES=()' >> etc/mkinitcpio.conf
 echo 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsck)' >> etc/mkinitcpio.conf
 popd
 
-cryptuuid=$(blkid -s UUID -o value ${INSTALL_DISK}2)
 echo "setting system clock"
 _chroot hwclock --systohc
 echo "generating locales"
