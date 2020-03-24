@@ -132,7 +132,7 @@ EOF
 
 echo "identifying network devices"
 eth0=$(ip link show | grep enp | head -1 | awk -F ': ' '{print $2}')
-wlan0=$(ip link show | grep wlp | head -1 | awk -F ': ' '{print $2}')
+wlan0=$(ip link show | grep wlp | head -1 | awk -F ': ' '{print $2}') || wlan=""
 
 echo "creating netctl ethernet profile"
 cat << EOF > ${root_mountpoint}/etc/netctl/ethernet-dhcp
@@ -148,5 +148,17 @@ _chroot systemctl enable netctl-ifplugd@${eth0}
 if [[ -n $wlan0 ]]; then
   _chroot systemctl enable netctl-auto@${wlan0}
 fi
+
+echo "creating user ${USERNAME}"
+_chroot useradd -mU -d /home/${USERNAME} -G wheel docker vboxusers input ${USERNAME}
+_chroot passwd ${USERNAME}
+
+echo "editing sudoers file"
+sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' ${root_mountpoint}/etc/sudoers
+
+echo "configuring user profile"
+wget -O ${root_mountpoint}/home/${USERNAME}/init.sh https://raw.githubusercontent.com/williamkray/scripts/master/init.sh
+chmod +x ${root_mountpoint}/home/${USERNAME}/init.sh
+_chroot chown ${USERNAME}.${USERNAME} /home/${USERNAME}/init.sh
 
 echo "done"
