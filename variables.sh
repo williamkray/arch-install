@@ -12,7 +12,10 @@ INSTALL_PKGS="base \
   docker \
   docker-compose \
   openssh \
+  xorg-server \
   xorg-server-devel \
+  xorg-xsetroot \
+  ttf-dejavu \
   rsync \
   pcmanfm \
   gimp \
@@ -40,6 +43,8 @@ INSTALL_PKGS="base \
   feh \
   virtualbox \
   virtualbox-host-modules \
+  wget \
+  curl \
   git"
 TIMEZONE="America/Los_Angeles"
 HOSTNAME="testhost"

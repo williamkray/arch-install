@@ -160,5 +160,6 @@ echo "configuring user profile"
 wget -O ${root_mountpoint}/home/${USERNAME}/init.sh https://raw.githubusercontent.com/williamkray/scripts/master/init.sh
 chmod +x ${root_mountpoint}/home/${USERNAME}/init.sh
 _chroot chown ${USERNAME}.${USERNAME} /home/${USERNAME}/init.sh
+_chroot sudo su - ${USERNAME} bash ~/init.sh
 
 echo "done"
