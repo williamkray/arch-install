@@ -88,7 +88,7 @@ cat << EOF > /etc/hosts
 ::1           localhost   ${HOSTNAME}
 EOF
 echo "writing mkinitcpio.conf file"
-cp etc/mkinitcpio.conf{.backup}
+cp etc/mkinitcpio.conf{,.backup}
 echo 'MODULES=()' > etc/mkinitcpio.conf
 echo 'BINARIES()' >> etc/mkinitcpio.conf
 echo 'FILES()' >> etc/mkinitcpio.conf
