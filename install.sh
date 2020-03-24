@@ -6,16 +6,17 @@ set -euo pipefail
 ## intended to be run from the arch live ISO
 ## this script is extremely destructive, run with caution
 
-## pull in variables 
+echo "sourcing variables"
 source variables.sh
 
-## set systemtime
+echo "setting time"
 timedatectl set-ntp true
 
 ## create partitions as such:
 ## 512M /boot
 ## the rest /
 ## optimize alignment for partitions
+echo "creating partitions with parted"
 parted --script -a opt -- ${INSTALL_DISK} \
   mklabel gpt \
   mkpart boot fat32 1MiB 512MiB \
@@ -24,10 +25,14 @@ parted --script -a opt -- ${INSTALL_DISK} \
 
 ## create our encrypted root volume
 ## and decrypt it
+echo "creating encrypted root volume"
 cryptsetup -y -v luksFormat ${INSTALL_DISK}2
+
+echo "decrypting root volume"
 cryptsetup open ${INSTALL_DISK}2 cryptroot
 
 ## make filesystems
+echo "formatting filesystems"
 mkfs.fat -F32 ${INSTALL_DISK}1
 mkfs.ext4 /dev/mapper/cryptroot
 
@@ -36,25 +41,30 @@ root_mountpoint="/mnt"
 boot_mountpoint="${root_mountpoint}/boot"
 
 ## mount partitions appropriately
+echo "mounting filesystems for installation at $root_mountpoint"
 mkdir -p $root_mountpoint
 mount /dev/mapper/cryptroot $root_mountpoint
 mount ${INSTALL_DISK}1 $boot_mountpoint
 
 ## create swapfile, comment out if not needed
+echo "creating swapfile"
 dd if=/dev/zero of=${root_mountpoint}/swapfile bs=1M count=4096 status=progress
 chmod 600 ${root_mountpoint}/swapfile
 mkswap ${root_mountpoint}/swapfile
 swapon ${root_mountpoint}/swapfile
 
 ## rank pacman mirrors by speed and location
+echo "installing rankmirrors and setting up pacman mirror list"
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 pacman -Sy --noconfirm pacman-contrib
 curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 
 ## run installation
+echo "installing packages"
 pacstrap $root_mountpoint $INSTALL_PKGS
 
 ## generate fstab
+echo "generating fstab"
 genfstab -U ${root_mountpoint} >> ${root_mountpoint}/etc/fstab
 
 ## change-root and install various system configurations
@@ -63,14 +73,20 @@ _chroot() {
 }
 
 pushd ${root_mountpoint}
+echo "setting timezone to $TIMEZONE"
 ln -sf usr/share/zoneinfo/${TIMEZONE} etc/localtime
+echo "fixing locale"
 sed -i 's/^#en_US/en_US/g' etc/locale.gen
+echo "setting language"
 echo 'LANG=en_US.UTF-8' > etc/locale.conf
+echo "setting hostname to $HOSTNAME"
 echo ${HOSTNAME} > etc/hostname
+echo "writing hostsfile"
 cat << EOF > /etc/hosts
 127.0.0.1     localhost   ${HOSTNAME}
 ::1           localhost   ${HOSTNAME}
 EOF
+echo "writing mkinitcpio.conf file"
 cp etc/mkinitcpio.conf{.backup}
 echo 'MODULES=()' > etc/mkinitcpio.conf
 echo 'BINARIES()' >> etc/mkinitcpio.conf
@@ -79,8 +95,15 @@ echo 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsc
 popd
 
 cryptuuid=$(blkid -s UUID -o value ${INSTALL_DISK}2)
+echo "setting system clock"
 _chroot hwclock --systohc
+echo "generating locales"
 _chroot locale-gen
+echo "generating initramfs"
 _chroot mkinitcpio -P
+echo "setting root password"
 _chroot passwd
+echo "installing efistub bootloader config"
 _chroot efibootmgr --disk ${INSTALL_DISK} --part 1 --create --label "Arch Linux" --loader /vmlinuz-linux --unicode "cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw initrd=/intel-ucode.img initrd=/initramfs-linux.img"
+
+echo "done"
