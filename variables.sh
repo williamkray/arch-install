@@ -7,6 +7,6 @@ INSTALL_PKGS="base base-devel linux linux-firmware linux-lts \
   xorg-server-devel rsync pcmanfm gimp firefox tmux vim rofi \
   arandr wireless_tools wpa_supplicant dhcpcd netctl intel-ucode \
   cmus efibootmgr alsa-utils pulseaudio-alsa pavucontrol pulseaudio \
-  pulseaudio-bluetooth"
+  pulseaudio-bluetooth ifplugd"
 TIMEZONE="America/Los_Angeles"
 HOSTNAME="testhost"

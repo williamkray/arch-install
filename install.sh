@@ -75,7 +75,7 @@ _chroot() {
 
 pushd ${root_mountpoint}
 echo "setting timezone to $TIMEZONE"
-ln -sf usr/share/zoneinfo/${TIMEZONE} etc/localtime
+ln -sf /usr/share/zoneinfo/${TIMEZONE} etc/localtime
 echo "fixing locale"
 sed -i 's/^#en_US/en_US/g' etc/locale.gen
 echo "setting language"
@@ -129,5 +129,21 @@ initrd /intel-ucode.img
 initrd /initramfs-linux-lts.img
 options cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw
 EOF
+
+echo "enabling network at boot"
+eth0=$(ip link show | grep enp | head -1 | awk -F ': ' '{print $2}')
+wlan0=$(ip link show | grep wlp | head -1 | awk -F ': ' '{print $2}')
+cat << EOF > ${root_mountpoint}/etc/netctl/wired-dhcp
+Description='A basic dhcp ethernet connection'
+Interface=${eth0}
+Connection=ethernet
+IP=dhcp
+EOF
+
+_chroot systemctl enable netctl-ifplugd@${eth0}
+
+if [[ -n $wlan0 ]]; then
+  _chroot systemctl enable netctl-auto@${wlan0}
+fi
 
 echo "done"
