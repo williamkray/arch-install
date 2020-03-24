@@ -130,16 +130,19 @@ initrd /initramfs-linux-lts.img
 options cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw
 EOF
 
-echo "enabling network at boot"
+echo "identifying network devices"
 eth0=$(ip link show | grep enp | head -1 | awk -F ': ' '{print $2}')
 wlan0=$(ip link show | grep wlp | head -1 | awk -F ': ' '{print $2}')
-cat << EOF > ${root_mountpoint}/etc/netctl/wired-dhcp
+
+echo "creating netctl ethernet profile"
+cat << EOF > ${root_mountpoint}/etc/netctl/ethernet-dhcp
 Description='A basic dhcp ethernet connection'
 Interface=${eth0}
 Connection=ethernet
 IP=dhcp
 EOF
 
+echo "enabling network at boot"
 _chroot systemctl enable netctl-ifplugd@${eth0}
 
 if [[ -n $wlan0 ]]; then
