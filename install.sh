@@ -42,8 +42,9 @@ boot_mountpoint="${root_mountpoint}/boot"
 
 ## mount partitions appropriately
 echo "mounting filesystems for installation at $root_mountpoint"
-mkdir -p $root_mountpoint $boot_mountpoint
+mkdir -p $root_mountpoint
 mount /dev/mapper/cryptroot $root_mountpoint
+mkdir -p $boot_mountpoint
 mount ${INSTALL_DISK}1 $boot_mountpoint
 
 ## create swapfile, comment out if not needed
