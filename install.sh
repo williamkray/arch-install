@@ -33,6 +33,7 @@ INSTALL_PKGS="base \
   wireless_tools \
   wpa_supplicant \
   dhcpcd \
+  inetutils \
   netctl \
   intel-ucode \
   cmus \
@@ -199,7 +200,7 @@ if [[ -n $wlan0 ]]; then
 fi
 
 echo "creating user ${USERNAME}"
-_chroot useradd -mU -d /home/${USERNAME} -G wheel docker vboxusers input ${USERNAME}
+_chroot useradd -mU -d /home/${USERNAME} -G wheel,docker,vboxusers,input ${USERNAME}
 _chroot passwd ${USERNAME}
 
 echo "editing sudoers file"
@@ -209,6 +210,6 @@ echo "configuring user profile"
 wget -O ${root_mountpoint}/home/${USERNAME}/init.sh https://raw.githubusercontent.com/williamkray/scripts/master/init.sh
 chmod +x ${root_mountpoint}/home/${USERNAME}/init.sh
 _chroot chown ${USERNAME}.${USERNAME} /home/${USERNAME}/init.sh
-_chroot sudo su - ${USERNAME} bash ~/init.sh
+#_chroot sudo su - ${USERNAME} bash ~/init.sh
 
 echo "done"
