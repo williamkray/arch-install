@@ -81,7 +81,6 @@ parted --script -a opt -- ${INSTALL_DISK} \
   set 1 esp on \
   mkpart root ext4 512MiB 100%
 
-cryptuuid=$(blkid -s UUID -o value ${INSTALL_DISK}2)
 ## create our encrypted root volume
 ## and decrypt it
 echo "creating encrypted root volume"
@@ -94,6 +93,8 @@ cryptsetup open ${INSTALL_DISK}2 cryptroot
 echo "formatting filesystems"
 mkfs.fat -F32 ${INSTALL_DISK}1
 mkfs.ext4 /dev/mapper/cryptroot
+# save uuid for later
+cryptuuid=$(blkid -s UUID -o value ${INSTALL_DISK}2)
 
 ## mount partitions appropriately
 echo "mounting filesystems for installation at $root_mountpoint"
