@@ -6,6 +6,14 @@ set -euo pipefail
 ## intended to be run from the arch live ISO
 ## this script is extremely destructive, run with caution
 
+## TODO:
+## add more of my preferred packages out of the box
+## include initial user setup steps
+## include installation of yay from aur
+## include list of packages to install from aur with yay
+## update inotify watch count
+## update swappiness
+
 ## sets environment variables to be used by an arch installation
 INSTALL_DISK="/dev/sda"
 INSTALL_PKGS="base \
@@ -18,6 +26,8 @@ INSTALL_PKGS="base \
   docker \
   docker-compose \
   openssh \
+  scrot \
+  imagemagick \
   xorg-server \
   xorg-server-devel \
   xorg-xsetroot \
@@ -28,7 +38,9 @@ INSTALL_PKGS="base \
   firefox \
   tmux \
   vim \
+  go \
   rofi \
+  unclutter \
   arandr \
   wireless_tools \
   wpa_supplicant \
@@ -56,6 +68,10 @@ INSTALL_PKGS="base \
 TIMEZONE="America/Los_Angeles"
 HOSTNAME="testhost"
 USERNAME="wreck"
+INSTALL_AUR_PKGS="bitwarden-cli \
+  bitwarden-bin \
+  ttf-google-fonts-git \
+  keybase-bin"
 
 
 ## define things
@@ -182,8 +198,8 @@ options cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw
 EOF
 
 echo "identifying network devices"
-eth0=$(ip link show | grep enp | head -1 | awk -F ': ' '{print $2}')
-wlan0=$(ip link show | grep wlp | head -1 | awk -F ': ' '{print $2}') || wlan=""
+eth0=$(ip link show | grep en | head -1 | awk -F ': ' '{print $2}')
+wlan0=$(ip link show | grep wl | head -1 | awk -F ': ' '{print $2}') || wlan=""
 
 echo "creating netctl ethernet profile"
 cat << EOF > ${root_mountpoint}/etc/netctl/ethernet-dhcp
@@ -210,7 +226,11 @@ sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' ${root_mountpoint}/etc/
 echo "configuring user profile"
 wget -O ${root_mountpoint}/home/${USERNAME}/init.sh https://raw.githubusercontent.com/williamkray/scripts/master/init.sh
 chmod +x ${root_mountpoint}/home/${USERNAME}/init.sh
-_chroot chown ${USERNAME}.${USERNAME} /home/${USERNAME}/init.sh
+pushd ${root_mountpoint}/home/${USERNAME}
+git clone https://aur.archlinux.org/yay.git
+echo "$INSTALL_AUR_PKGS" > aur-pkgs
+_chroot chown -R ${USERNAME}.${USERNAME} /home/${USERNAME}
 #_chroot sudo su - ${USERNAME} bash ~/init.sh
+
 
 echo "done"
