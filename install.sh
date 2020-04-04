@@ -39,6 +39,7 @@ INSTALL_PKGS="base \
   firefox \
   tmux \
   vim \
+  w3m \
   go \
   rofi \
   unclutter \
@@ -53,6 +54,7 @@ INSTALL_PKGS="base \
   efibootmgr \
   alsa-utils \
   pulseaudio-alsa \
+  xfce4-notifyd \
   pavucontrol \
   pulseaudio \
   pulseaudio-bluetooth \
@@ -63,6 +65,7 @@ INSTALL_PKGS="base \
   feh \
   virtualbox \
   virtualbox-host-modules-arch \
+  syncthing \
   wget \
   curl \
   git"
@@ -72,6 +75,7 @@ USERNAME="wreck"
 INSTALL_AUR_PKGS="bitwarden-cli \
   bitwarden-bin \
   ttf-google-fonts-git \
+  appgate-sdp-5 \
   keybase-bin"
 
 
@@ -223,6 +227,12 @@ _chroot passwd ${USERNAME}
 
 echo "editing sudoers file"
 sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' ${root_mountpoint}/etc/sudoers
+
+## boost number of inotify-watches for things like
+## syncthing and backup programs
+cat << EOF > ${root_mountpoint}/etc/sysctl.d/99-inotify-watch.conf
+fs.inotify.max_user_watches=60000000
+EOF
 
 echo "configuring user profile"
 wget -O ${root_mountpoint}/home/${USERNAME}/init.sh https://raw.githubusercontent.com/williamkray/scripts/master/init.sh
