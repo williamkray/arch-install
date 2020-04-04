@@ -33,6 +33,7 @@ INSTALL_PKGS="base \
   xorg-xsetroot \
   ttf-dejavu \
   rsync \
+  mutt \
   pcmanfm \
   gimp \
   firefox \
