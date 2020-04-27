@@ -43,9 +43,11 @@ INSTALL_PKGS="base \
   unclutter \
   arandr \
   wireless_tools \
+  dialog \
   wpa_supplicant \
   dhcpcd \
   inetutils \
+  bind-tools \
   netctl \
   intel-ucode \
   cmus \
