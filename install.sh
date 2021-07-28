@@ -229,7 +229,7 @@ echo "configuring user profile"
 wget -O ${root_mountpoint}/home/${USERNAME}/init.sh https://raw.githubusercontent.com/williamkray/scripts/master/init.sh
 chmod +x ${root_mountpoint}/home/${USERNAME}/init.sh
 pushd ${root_mountpoint}/home/${USERNAME}
-git clone https://aur.archlinux.org/yay.git
+git clone https://aur.archlinux.org/yay-bin.git
 echo "$INSTALL_AUR_PKGS" > aur-pkgs
 _chroot chown -R ${USERNAME}.${USERNAME} /home/${USERNAME}
 #_chroot sudo su - ${USERNAME} bash ~/init.sh
