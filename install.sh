@@ -216,23 +216,29 @@ options cryptdevice=UUID=${cryptuuid}:cryptroot root=/dev/mapper/cryptroot rw
 EOF
 
 echo "identifying network devices"
-eth0=$(ip link show | grep en | head -1 | awk -F ': ' '{print $2}')
-wlan0=$(ip link show | grep wl | head -1 | awk -F ': ' '{print $2}') || wlan=""
+eth0=$(ip link show | grep en | head -1 | awk -F ': ' '{print $2}') || eth0=""
+wlan0=$(ip link show | grep wl | head -1 | awk -F ': ' '{print $2}') || wlan0=""
 
-echo "creating netctl ethernet profile"
-cat << EOF > ${root_mountpoint}/etc/netctl/ethernet-dhcp
+if [[ -n $eth0 ]]; then
+  echo "creating netctl ethernet profile"
+  cat << EOF > ${root_mountpoint}/etc/netctl/ethernet-dhcp
 Description='A basic dhcp ethernet connection'
 Interface=${eth0}
 Connection=ethernet
 IP=dhcp
 EOF
 
-echo "enabling network at boot"
-_chroot systemctl enable netctl-ifplugd@${eth0}
+  echo "enabling ethernet network device at boot"
+  _chroot systemctl enable netctl-ifplugd@${eth0}
+fi
 
 if [[ -n $wlan0 ]]; then
+  echo "enabling wireless network device $wlan0 at boot"
   _chroot systemctl enable netctl-auto@${wlan0}
 fi
+
+echo "enabling autorandr"
+_chroot systemctl enable autorandr.service
 
 echo "creating user ${USERNAME}"
 _chroot useradd -mU -d /home/${USERNAME} -G wheel,docker,vboxusers,input ${USERNAME}
