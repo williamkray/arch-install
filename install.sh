@@ -74,6 +74,7 @@ INSTALL_PKGS="base \
   swayidle \
   swaylock \
   wf-recorder \
+  grim \
   wofi \
   mako \
   wget \
