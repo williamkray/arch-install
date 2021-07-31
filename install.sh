@@ -27,6 +27,7 @@ INSTALL_PKGS="base \
   docker-compose \
   openssh \
   scrot \
+  maim \
   imagemagick \
   xorg-server \
   xorg-server-devel \
@@ -36,6 +37,7 @@ INSTALL_PKGS="base \
   pcmanfm \
   gimp \
   firefox \
+  chromium \
   tmux \
   vim \
   go \
@@ -60,12 +62,24 @@ INSTALL_PKGS="base \
   ifplugd \
   xorg-xinit \
   xautolock \
+  autorandr \
+  i3-gaps \
   i3lock \
+  dunst \
+  kitty \
   feh \
-  virtualbox \
-  virtualbox-host-modules-arch \
+  sway \
+  slurp \
+  swaybg \
+  swayidle \
+  swaylock \
+  wf-recorder \
+  wofi \
+  mako \
   wget \
   curl \
+  virt-manager \
+  virt-viewer \
   git"
 TIMEZONE="America/Los_Angeles"
 HOSTNAME="testhost"
@@ -73,6 +87,7 @@ USERNAME="wreck"
 INSTALL_AUR_PKGS="bitwarden-cli \
   bitwarden-bin \
   ttf-google-fonts-git \
+  grimshot \
   keybase-bin"
 
 
